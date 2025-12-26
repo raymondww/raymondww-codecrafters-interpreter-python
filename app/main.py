@@ -72,6 +72,7 @@ def scanToken(char):
 def addToken(tokenType, lexeme=None):
     text = "null"
     print(f"{tokenType} {lexeme} {text}")
+    print(f"{EOF}  {text}")
 
 def main():
     if len(sys.argv) < 3:
@@ -96,7 +97,7 @@ def main():
             scanToken(char)
         # raise NotImplementedError("Scanner not implemented")
     else:
-        print(f"{EOF} null") # Placeholder, replace this line when implementing the scanner
+        print(f"{EOF}  null") # Placeholder, replace this line when implementing the scanner
 
 
 if __name__ == "__main__":
