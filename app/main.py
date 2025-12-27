@@ -57,47 +57,72 @@ SEMICOLON = TokenType()['SEMICOLON']
 STAR = TokenType()['STAR']
 EOF = TokenType()['EOF']
 
+has_error = False
+
 def scanToken(char):
-    if char=='(': addToken(LEFT_PAREN,char)
-    if char==')': addToken(RIGHT_PAREN,char)
-    if char=='{': addToken(LEFT_BRACE,char)
-    if char=='}': addToken(RIGHT_BRACE,char)
-    if char==',': addToken(COMMA,char)
-    if char=='.': addToken(DOT,char)
-    if char=='-': addToken(MINUS,char)
-    if char=='+': addToken(PLUS,char)
-    if char==';': addToken(SEMICOLON,char)
-    if char=='*': addToken(STAR,char)
+    global has_error
     
-def addToken(tokenType, lexeme=None):
-    text = "null"
-    print(f"{tokenType} {lexeme} {text}")
+    # Ignore whitespace
+    if char in ' \r\t\n':
+        return
+    
+    # Single-character tokens
+    if char == '(': 
+        addToken(LEFT_PAREN, char)
+    elif char == ')': 
+        addToken(RIGHT_PAREN, char)
+    elif char == '{': 
+        addToken(LEFT_BRACE, char)
+    elif char == '}': 
+        addToken(RIGHT_BRACE, char)
+    elif char == ',':  
+        addToken(COMMA, char)
+    elif char == '.':  
+        addToken(DOT, char)
+    elif char == '-': 
+        addToken(MINUS, char)
+    elif char == '+':  
+        addToken(PLUS, char)
+    elif char == ';': 
+        addToken(SEMICOLON, char)
+    elif char == '*': 
+        addToken(STAR, char)
+    else: 
+        # Unknown character - report error to stderr
+        print(f"[line 1] Error: Unexpected character:  {char}", file=sys.stderr)
+        has_error = True
+
+def addToken(tokenType, lexeme, literal="null"):
+    # Print token to stdout
+    print(f"{tokenType} {lexeme} {literal}")
 
 def main():
+    global has_error
+    
     if len(sys.argv) < 3:
-        print("Usage: ./your_program.sh tokenize <filename>", file=sys.stderr)
+        print("Usage:  ./your_program.sh tokenize <filename>", file=sys. stderr)
         exit(1)
 
     command = sys.argv[1]
-    filename = sys.argv[2]
+    filename = sys. argv[2]
 
-    if command != "tokenize":
-        print(f"Unknown command: {command}", file=sys.stderr)
+    if command != "tokenize": 
+        print(f"Unknown command: {command}", file=sys. stderr)
         exit(1)
 
     with open(filename) as file:
         file_contents = file.read()
 
-    # You can use print statements as follows for debugging, they'll be visible when running tests.
-    print("Logs from your program will appear here!", file=sys.stderr)
-
-    if file_contents:
-        for char in file_contents:
-            scanToken(char)
-        print(f"{EOF}  null")
-        # raise NotImplementedError("Scanner not implemented")
-    else:
-        print(f"{EOF}  null") # Placeholder, replace this line when implementing the scanner
+    # Scan all characters
+    for char in file_contents: 
+        scanToken(char)
+    
+    # Always print EOF token
+    print(f"{EOF}  null")
+    
+    # Exit with code 65 if there were errors
+    if has_error:
+        exit(65)
 
 
 if __name__ == "__main__":
