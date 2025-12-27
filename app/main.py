@@ -89,25 +89,24 @@ def scanToken(char):
         addToken(STAR, char)
     else: 
         # Unknown character - report error to stderr
-        print(f"[line 1] Error: Unexpected character:  {char}", file=sys.stderr)
+        print(f"[line 1] Error: Unexpected character: {char}", file=sys.stderr)
         has_error = True
 
 def addToken(tokenType, lexeme, literal="null"):
     # Print token to stdout
     print(f"{tokenType} {lexeme} {literal}")
-
 def main():
     global has_error
     
     if len(sys.argv) < 3:
-        print("Usage:  ./your_program.sh tokenize <filename>", file=sys. stderr)
+        print("Usage:  ./your_program.sh tokenize <filename>", file=sys.stderr)
         exit(1)
 
     command = sys.argv[1]
     filename = sys. argv[2]
 
     if command != "tokenize": 
-        print(f"Unknown command: {command}", file=sys. stderr)
+        print(f"Unknown command: {command}", file=sys.stderr)
         exit(1)
 
     with open(filename) as file:
