@@ -76,11 +76,14 @@ class Scanner:
         self.has_error = False
         
     def scanToken(self):
-        char = self.advance()        
+        char = self.advance()  
         # Ignore whitespace
-        if char in ' \r\t\n':
+        if char in ' \r\t':
             return
-        
+        # read new line
+        if char == '\n':
+            self.line += 1
+            return        
         # Single-character tokens
         if char == '(': 
             self.addToken(LEFT_PAREN)
@@ -130,7 +133,7 @@ class Scanner:
             else: self.addToken(GREATER)
         else: 
             # Unknown character - report error to stderr
-            print(f"[line 1] Error: Unexpected character: {char}", file=sys.stderr)
+            print(f"[line {self.line}] Error: Unexpected character: {char}", file=sys.stderr)
             self.has_error = True
             
     def scanTokens(self):
@@ -170,7 +173,7 @@ def main():
 
     with open(filename) as file:
         file_contents = file.read()
-        
+    print([f for f in file_contents])
     scanner = Scanner(file_contents)
     scanner.scanTokens()
 
