@@ -56,54 +56,105 @@ PLUS = TokenType()['PLUS']
 SEMICOLON = TokenType()['SEMICOLON']
 STAR = TokenType()['STAR']
 EOF = TokenType()['EOF']
-
-has_error = False
-
-def scanToken(char):
-    global has_error
+BANG = TokenType()['BANG']
+BANG_EQUAL = TokenType()['BANG_EQUAL']
+EQUAL = TokenType()['EQUAL']
+EQUAL_EQUAL = TokenType()['EQUAL_EQUAL']
+GREATER = TokenType()['GREATER']
+GREATER_EQUAL = TokenType()['GREATER_EQUAL']
+LESS = TokenType()['LESS']
+LESS_EQUAL = TokenType()['LESS_EQUAL']
     
-    # Ignore whitespace
-    if char in ' \r\t\n':
-        return
+class Scanner:
+    def __init__(self, source:str):
+        self.start = 0
+        self.current = 0
+        self.line = 1
+        self.source = source
+        self.has_error = False
+        
+    def scanToken(self):
+        char = self.advance()        
+        # Ignore whitespace
+        if char in ' \r\t\n':
+            return
+        
+        # Single-character tokens
+        if char == '(': 
+            self.addToken(LEFT_PAREN)
+        elif char == ')': 
+            self.addToken(RIGHT_PAREN)
+        elif char == '{': 
+            self.addToken(LEFT_BRACE)
+        elif char == '}': 
+            self.addToken(RIGHT_BRACE)
+        elif char == ',':  
+            self.addToken(COMMA)
+        elif char == '.':  
+            self.addToken(DOT)
+        elif char == '-': 
+            self.addToken(MINUS)
+        elif char == '+':  
+            self.addToken(PLUS)
+        elif char == ';': 
+            self.addToken(SEMICOLON)
+        elif char == '*': 
+            self.addToken(STAR)
+        elif char == '!': 
+            if self.peek() == '=':
+                self.advance()
+                self.addToken(BANG_EQUAL)
+            else: self.addToken(BANG)
+        elif char == '=': 
+            if self.peek() == '=':
+                self.advance()
+                self.addToken(EQUAL_EQUAL)
+            else: self.addToken(EQUAL)
+        elif char == '<': 
+            if self.peek() == '=':
+                self.advance()
+                self.addToken(LESS_EQUAL)
+            else: self.addToken(LESS)
+        elif char == '>':
+            if self.peek() == '=':
+                self.advance()
+                self.addToken(GREATER_EQUAL)
+            else: self.addToken(GREATER)
+        else: 
+            # Unknown character - report error to stderr
+            print(f"[line 1] Error: Unexpected character: {char}", file=sys.stderr)
+            self.has_error = True
+            
+    def scanTokens(self):
+        while self.current < len(self.source):
+            self.start = self.current
+            self.scanToken()
+        print(f"{EOF}  null")
+        
+    def advance(self):
+        """Get current character and move forward"""
+        char = self.source[self.current]
+        self.current += 1
+        return char
     
-    # Single-character tokens
-    if char == '(': 
-        addToken(LEFT_PAREN, char)
-    elif char == ')': 
-        addToken(RIGHT_PAREN, char)
-    elif char == '{': 
-        addToken(LEFT_BRACE, char)
-    elif char == '}': 
-        addToken(RIGHT_BRACE, char)
-    elif char == ',':  
-        addToken(COMMA, char)
-    elif char == '.':  
-        addToken(DOT, char)
-    elif char == '-': 
-        addToken(MINUS, char)
-    elif char == '+':  
-        addToken(PLUS, char)
-    elif char == ';': 
-        addToken(SEMICOLON, char)
-    elif char == '*': 
-        addToken(STAR, char)
-    else: 
-        # Unknown character - report error to stderr
-        print(f"[line 1] Error: Unexpected character: {char}", file=sys.stderr)
-        has_error = True
+    def peek(self):
+        """Look at current character WITHOUT consuming it"""
+        if self.current >= len(self.source):
+            return '\0'
+        return self.source[self.current]
+    
+    def addToken(self, token_type):
+        lexeme = self.source[self.start:self.current]
+        print(f"{token_type} {lexeme} null")
+        
 
-def addToken(tokenType, lexeme, literal="null"):
-    # Print token to stdout
-    print(f"{tokenType} {lexeme} {literal}")
-def main():
-    global has_error
-    
+def main():    
     if len(sys.argv) < 3:
         print("Usage:  ./your_program.sh tokenize <filename>", file=sys.stderr)
         exit(1)
 
     command = sys.argv[1]
-    filename = sys. argv[2]
+    filename = sys.argv[2]
 
     if command != "tokenize": 
         print(f"Unknown command: {command}", file=sys.stderr)
@@ -111,16 +162,12 @@ def main():
 
     with open(filename) as file:
         file_contents = file.read()
+        
+    scanner = Scanner(file_contents)
+    scanner.scanTokens()
 
-    # Scan all characters
-    for char in file_contents: 
-        scanToken(char)
-    
-    # Always print EOF token
-    print(f"{EOF}  null")
-    
     # Exit with code 65 if there were errors
-    if has_error:
+    if scanner.has_error:
         exit(65)
 
 
