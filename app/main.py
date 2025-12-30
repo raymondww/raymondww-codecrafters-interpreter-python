@@ -173,7 +173,6 @@ def main():
 
     with open(filename) as file:
         file_contents = file.read()
-    print([f for f in file_contents])
     scanner = Scanner(file_contents)
     scanner.scanTokens()
 
