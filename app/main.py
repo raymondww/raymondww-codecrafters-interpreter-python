@@ -12,6 +12,7 @@ def TokenType():
     PLUS = 'PLUS'
     SEMICOLON = 'SEMICOLON'
     STAR = 'STAR'
+    SLASH = 'SLASH' 
     # one or two character tokens.
     BANG = 'BANG'
     BANG_EQUAL = 'BANG_EQUAL'
@@ -55,6 +56,7 @@ MINUS = TokenType()['MINUS']
 PLUS = TokenType()['PLUS']
 SEMICOLON = TokenType()['SEMICOLON']
 STAR = TokenType()['STAR']
+SLASH = TokenType()['SLASH']
 EOF = TokenType()['EOF']
 BANG = TokenType()['BANG']
 BANG_EQUAL = TokenType()['BANG_EQUAL']
@@ -100,6 +102,12 @@ class Scanner:
             self.addToken(SEMICOLON)
         elif char == '*': 
             self.addToken(STAR)
+        elif char == '/':
+            if self.peek() == '/':
+                # A comment goes until the end of the line.
+                while self.peek() != '\n' and self.current < len(self.source):
+                    self.advance()
+            else: self.addToken(SLASH)
         elif char == '!': 
             if self.peek() == '=':
                 self.advance()
