@@ -66,6 +66,7 @@ GREATER = TokenType()['GREATER']
 GREATER_EQUAL = TokenType()['GREATER_EQUAL']
 LESS = TokenType()['LESS']
 LESS_EQUAL = TokenType()['LESS_EQUAL']
+STRING = TokenType()['STRING']
     
 class Scanner:
     def __init__(self, source:str):
@@ -131,6 +132,19 @@ class Scanner:
                 self.advance()
                 self.addToken(GREATER_EQUAL)
             else: self.addToken(GREATER)
+        elif char == '"':
+            # string literal, keep scanning until we find the ending "
+            while self.peek() != '"' and self.current < len(self.source):
+                if self.peek() == '\n':
+                    self.line += 1
+                self.advance()
+            if self.current >= len(self.source):
+                print(f"[line {self.line}] Error: Unterminated string.", file=sys.stderr)
+                self.has_error = True
+                return
+            # The closing ".
+            self.advance()
+            self.addToken(STRING)
         else: 
             # Unknown character - report error to stderr
             print(f"[line {self.line}] Error: Unexpected character: {char}", file=sys.stderr)
@@ -149,6 +163,9 @@ class Scanner:
         return char
     
     def peek(self):
+        # we call peek() inside scanToken after advance()
+        # advance() already moved current forward by 1
+        # so we are peeking at the current character after that
         """Look at current character WITHOUT consuming it"""
         if self.current >= len(self.source):
             return '\0'
@@ -156,7 +173,11 @@ class Scanner:
     
     def addToken(self, token_type):
         lexeme = self.source[self.start:self.current]
-        print(f"{token_type} {lexeme} null")
+        if token_type == STRING:
+            # For STRING tokens, we need to strip the surrounding quotes
+            lexeme_strip = lexeme[1:-1]
+            print(f"{token_type} {lexeme} {lexeme_strip}")
+        else: print(f"{token_type} {lexeme} null")
         
 
 def main():    
@@ -173,6 +194,7 @@ def main():
 
     with open(filename) as file:
         file_contents = file.read()
+    # print([f for f in file_contents])  # --- IGNORE ---
     scanner = Scanner(file_contents)
     scanner.scanTokens()
 
