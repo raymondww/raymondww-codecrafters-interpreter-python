@@ -159,7 +159,7 @@ class Scanner:
             print(f"{token_type} {lexeme} {lexeme_float}")
         elif token_type == IDENTIFIER:
             if hash_map.get(lexeme):
-                print(f"{token_type} {lexeme} {hash_map.get(lexeme)}")
+                print(f"{hash_map.get(lexeme)} {lexeme} null")
             else: print(f"{token_type} {lexeme} null")
         else: print(f"{token_type} {lexeme} null")
         
