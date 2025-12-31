@@ -1,50 +1,5 @@
 import sys
-
-def TokenType():
-    # Single-character tokens.
-    LEFT_PAREN = 'LEFT_PAREN'
-    RIGHT_PAREN = 'RIGHT_PAREN'
-    LEFT_BRACE = 'LEFT_BRACE'
-    RIGHT_BRACE = 'RIGHT_BRACE'
-    COMMA = 'COMMA'
-    DOT = 'DOT'
-    MINUS = 'MINUS'
-    PLUS = 'PLUS'
-    SEMICOLON = 'SEMICOLON'
-    STAR = 'STAR'
-    SLASH = 'SLASH' 
-    # one or two character tokens.
-    BANG = 'BANG'
-    BANG_EQUAL = 'BANG_EQUAL'
-    EQUAL = 'EQUAL'
-    EQUAL_EQUAL = 'EQUAL_EQUAL'
-    GREATER = 'GREATER'
-    GREATER_EQUAL = 'GREATER_EQUAL'
-    LESS = 'LESS'
-    LESS_EQUAL = 'LESS_EQUAL'
-    # Literals.
-    IDENTIFIER = 'IDENTIFIER'
-    STRING = 'STRING'
-    NUMBER = 'NUMBER'
-    # Keywords.
-    AND = 'AND'
-    CLASS = 'CLASS'
-    ELSE = 'ELSE'
-    FALSE = 'FALSE'
-    FUN = 'FUN'
-    FOR = 'FOR'
-    IF = 'IF'
-    NIL = 'NIL'
-    OR = 'OR'
-    PRINT = 'PRINT'
-    RETURN = 'RETURN'
-    SUPER = 'SUPER'
-    THIS = 'THIS'
-    TRUE = 'TRUE'
-    VAR = 'VAR'
-    WHILE = 'WHILE'
-    EOF = 'EOF'
-    return locals()
+from get_token_type import TokenType
 
 LEFT_PAREN = TokenType()['LEFT_PAREN']
 RIGHT_PAREN = TokenType()['RIGHT_PAREN']
@@ -68,6 +23,8 @@ LESS = TokenType()['LESS']
 LESS_EQUAL = TokenType()['LESS_EQUAL']
 STRING = TokenType()['STRING']
 NUMBER = TokenType()['NUMBER']
+IDENTIFIER = TokenType()['IDENTIFIER']
+hash_map = TokenType()['hash_map']
     
 class Scanner:
     def __init__(self, source:str):
@@ -154,6 +111,10 @@ class Scanner:
                 while self.isDigit(self.peek()) and self.current < len(self.source):
                     self.advance()
             self.addToken(NUMBER)
+        elif self.isAlpha(char):
+            while self.isAlphaNumeric(self.peek()) and self.current < len(self.source):
+                self.advance()
+            self.addToken(IDENTIFIER)
             
         else: 
             # Unknown character - report error to stderr
@@ -174,8 +135,6 @@ class Scanner:
     
     def peek(self)->str:
         # we call peek() inside scanToken after advance()
-        # advance() already moved current forward by 1
-        # so we are peeking at the current character after that
         """Look at current character WITHOUT consuming it"""
         if self.current >= len(self.source):
             return '\0'
@@ -196,12 +155,23 @@ class Scanner:
         elif token_type == NUMBER:
             lexeme_float = float(lexeme)
             print(f"{token_type} {lexeme} {lexeme_float}")
+        elif token_type == IDENTIFIER:
+            if hash_map.get(lexeme):
+                print(f"{token_type} {lexeme} {hash_map.get(lexeme)}")
+            else: print(f"{token_type} {lexeme} null")
         else: print(f"{token_type} {lexeme} null")
         
     def isDigit(self,char:str)->bool:
         return char >= '0' and char <= '9'
+    
+    def isAlpha(self,char:str)->bool:
+        return (char >= 'a' and char <= 'z') or (char >= 'A' and char <= 'Z') or char == '_'
+    
+    def isAlphaNumeric(self,char:str)->bool:
+        # logical or to check if the char is a character or number
+        # both are valid identifier
+        return self.isAlpha(char) or self.isDigit(char)        
         
-
 def main():    
     if len(sys.argv) < 3:
         print("Usage:  ./your_program.sh tokenize <filename>", file=sys.stderr)
