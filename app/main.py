@@ -1,4 +1,6 @@
 import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__)))
 from get_token_type import TokenType
 
 LEFT_PAREN = TokenType()['LEFT_PAREN']
