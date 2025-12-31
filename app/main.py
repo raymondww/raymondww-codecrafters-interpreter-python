@@ -67,6 +67,7 @@ GREATER_EQUAL = TokenType()['GREATER_EQUAL']
 LESS = TokenType()['LESS']
 LESS_EQUAL = TokenType()['LESS_EQUAL']
 STRING = TokenType()['STRING']
+NUMBER = TokenType()['NUMBER']
     
 class Scanner:
     def __init__(self, source:str):
@@ -76,7 +77,7 @@ class Scanner:
         self.source = source
         self.has_error = False
         
-    def scanToken(self):
+    def scanToken(self)->None:
         char = self.advance()  
         # Ignore whitespace
         if char in ' \r\t':
@@ -145,24 +146,33 @@ class Scanner:
             # The closing ".
             self.advance()
             self.addToken(STRING)
+        elif self.isDigit(char):
+            while self.isDigit(self.peek()) and self.current < len(self.source):
+                self.advance()
+            if self.peek() == '.' and self.isDigit(self.peek_next()):
+                self.advance()
+                while self.isDigit(self.peek()) and self.current < len(self.source):
+                    self.advance()
+            self.addToken(NUMBER)
+            
         else: 
             # Unknown character - report error to stderr
             print(f"[line {self.line}] Error: Unexpected character: {char}", file=sys.stderr)
             self.has_error = True
             
-    def scanTokens(self):
+    def scanTokens(self)->None:
         while self.current < len(self.source):
             self.start = self.current
             self.scanToken()
         print(f"{EOF}  null")
         
-    def advance(self):
+    def advance(self)->str:
         """Get current character and move forward"""
         char = self.source[self.current]
         self.current += 1
         return char
     
-    def peek(self):
+    def peek(self)->str:
         # we call peek() inside scanToken after advance()
         # advance() already moved current forward by 1
         # so we are peeking at the current character after that
@@ -171,13 +181,25 @@ class Scanner:
             return '\0'
         return self.source[self.current]
     
-    def addToken(self, token_type):
+    def peek_next(self)->str:
+        """Look at next character WITHOUT consuming it"""
+        if self.current+1 >= len(self.source):
+            return '\0'
+        return self.source[self.current+1]
+        
+    def addToken(self, token_type:str)->None:
         lexeme = self.source[self.start:self.current]
         if token_type == STRING:
             # For STRING tokens, we need to strip the surrounding quotes
             lexeme_strip = lexeme[1:-1]
             print(f"{token_type} {lexeme} {lexeme_strip}")
+        elif token_type == NUMBER:
+            lexeme_float = float(lexeme)
+            print(f"{token_type} {lexeme} {lexeme_float}")
         else: print(f"{token_type} {lexeme} null")
+        
+    def isDigit(self,char:str)->bool:
+        return char >= '0' and char <= '9'
         
 
 def main():    
